@@ -29,7 +29,7 @@ public class Bar {
     }
     public void moveBar(boolean leftPos,boolean rightPos){
         if(leftPos==true){
-            if(GameCanvas.checkWidth>=right) {
+            if(GameCanvas.canvasWidth>=right) {
                 left = left + 4;
                 right = right + 4;
             }

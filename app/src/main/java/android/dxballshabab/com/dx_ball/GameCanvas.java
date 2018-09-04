@@ -28,7 +28,6 @@ public class GameCanvas extends View implements Runnable{
     float downX, downY, upX, upY;
     int min_distance = 50;
     int ballSpeed,color;
-    public static int checkWidth=0;
     ArrayList<Bricks> bricks=new ArrayList<Bricks>();
     public GameCanvas(Context context) {
         super(context);
@@ -58,19 +57,73 @@ public class GameCanvas extends View implements Runnable{
             ball=new Ball( canvas.getWidth()/2, canvas.getHeight()/2 , 30);
             ball.setDx(6);
             ball.setDy(6);
-
+            canvasWidth = canvas.getWidth();
             bar=new Bar(getHeight() - 15, getHeight(),getWidth() / 2 - (barWidth / 2),getWidth() / 2 + (barWidth / 2),Color.BLUE);
 
+        }
+        if(startLife==true){
+            startLife = false;
+            ballSpeed = 8;
+            ball=new Ball(canvas.getWidth()/2,canvas.getHeight()-50,20);
+            ball.setDx( ballSpeed );
+            ball.setDy( -ballSpeed );
         }
         for(int i=0;i<bricks.size();i++){
             canvas.drawRect(bricks.get(i).getLeft(),bricks.get(i).getTop(),bricks.get(i).getRight(),bricks.get(i).getBottom(),bricks.get(i).getPaint());
         }
         canvas.drawRect(bar.getLeft(), bar.getTop(), bar.getRight(), bar.getBottom(), bar.getPaint());
         canvas.drawCircle(ball.getX(), ball.getY(), ball.getRadius(), ball.getPaint());
+        bar.moveBar(leftPos,rightPos);
+        ball.move();
+        this.run();
     }
 
     @Override
     public void run() {
+        invalidate();
+    }
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:{
+                downX=event.getX();
+                downY=event.getY();
+                return true;
 
+            }
+            case MotionEvent.ACTION_UP:{
+                upX=event.getX();
+                upY=event.getY();
+
+                float deltaX=downX-upX;
+                float deltaY=downY-upY;
+
+                if(Math.abs(deltaX) > Math.abs(deltaY)){
+                    if(Math.abs(deltaX) > min_distance) {
+                        if (deltaX < 0) {
+                            leftPos=true;
+                            rightPos=false;
+                            bar.moveBar(leftPos, rightPos);
+                            return true;
+                        }
+                        if (deltaX > 0) {
+                            leftPos=false;
+                            rightPos=true;
+                            bar.moveBar(leftPos,rightPos);
+                            return true;
+                        }
+                    }
+                    else return  false;
+                }
+                else{
+                    if(Math.abs(deltaY) > min_distance) {
+                        if (deltaY < 0) return true;
+                        if (deltaY > 0) return true;
+                    }
+                    else return  false;
+                }
+            }
+        }
+        return super.onTouchEvent(event);
     }
 }

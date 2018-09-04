@@ -56,10 +56,8 @@ public class Ball {
             GameCanvas.startLife=true;
             this.gameOver=1;
         }
-
         if(GameCanvas.life==0)
             GameCanvas.gameOver = true;
-
         if((this.x+this.radius)>=canvas.getWidth()
                 || (this.x-this.radius)<=0){
             this.dx = -this.dx;
