@@ -14,8 +14,9 @@ public class DxBallActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(new GameCanvas(this));
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.shortbeep);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(new GameCanvas(this, mp));
         //setContentView(R.layout.example);
     }
 

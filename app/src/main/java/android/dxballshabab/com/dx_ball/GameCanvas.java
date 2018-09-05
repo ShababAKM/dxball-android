@@ -2,7 +2,6 @@ package android.dxballshabab.com.dx_ball;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,15 +13,18 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameCanvas extends View implements Runnable{
+public class GameCanvas extends View {
     Paint paint ;
     Ball ball ;
     Bar bar;
-    SharedPreferences sharedPref;
     public static boolean gameOver,startLife,leftPos, rightPos, start = true,level2=false,gameOver2=false;
     public static int life,canvasWidth;
     float barWidth = 300;
@@ -32,8 +34,9 @@ public class GameCanvas extends View implements Runnable{
     float downX, downY, upX, upY;
     int min_distance = 50;
     int ballSpeed,color;
+    final MediaPlayer mp;
     ArrayList<Bricks> bricks=new ArrayList<Bricks>();
-    public GameCanvas(Context context) {
+    public GameCanvas(Context context, MediaPlayer mp) {
         super(context);
         paint=new Paint();
         life = 3;
@@ -41,6 +44,7 @@ public class GameCanvas extends View implements Runnable{
         startLife=true;
         start=true;
         bar = new Bar();
+        this.mp=mp;
     }
 
     @Override
@@ -50,31 +54,31 @@ public class GameCanvas extends View implements Runnable{
         {
             start=false;
             if(level2==false){
-            for(int i=0;i<27;i++) {
-                if (brickX >= canvas.getWidth()) {
-                    brickX = 0;
-                    brickY += 140;
-                }
-                if (i % 2 == 0)
-                    color = Color.GRAY;
-                else color = Color.BLACK;
-                bricks.add(new Bricks(brickX, brickY, brickX + canvas.getWidth() / 9, brickY + 140, color));
-                brickX += canvas.getWidth() / 9;
-            }}
-            else{
-            for(int i=0;i<3;i++)
-            {
-                brickX = 0;
-                brickY += 280;
-                for(int j=0;j<9;j++)
-                {
-                    if (j % 2 == 0)
+                for(int i=0;i<27;i++) {
+                    if (brickX >= canvas.getWidth()) {
+                        brickX = 0;
+                        brickY += 140;
+                    }
+                    if (i % 2 == 0)
                         color = Color.GRAY;
                     else color = Color.BLACK;
                     bricks.add(new Bricks(brickX, brickY, brickX + canvas.getWidth() / 9, brickY + 140, color));
                     brickX += canvas.getWidth() / 9;
-                }
-            }}
+                }}
+            else{
+                for(int i=0;i<3;i++)
+                {
+                    brickX = 0;
+                    brickY += 280;
+                    for(int j=0;j<9;j++)
+                    {
+                        if (j % 2 == 0)
+                            color = Color.GRAY;
+                        else color = Color.BLACK;
+                        bricks.add(new Bricks(brickX, brickY, brickX + canvas.getWidth() / 9, brickY + 140, color));
+                        brickX += canvas.getWidth() / 9;
+                    }
+                }}
             ball=new Ball(canvas.getWidth()/2,canvas.getHeight()-50,20);
             ball.setDx(6);
             ball.setDy(6);
@@ -109,7 +113,6 @@ public class GameCanvas extends View implements Runnable{
             canvas.drawText("FINAL SCORE: "+score,canvas.getWidth()/2-150,canvas.getHeight()/2+60,paint);
             gameOver = false;
 
-
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -126,12 +129,22 @@ public class GameCanvas extends View implements Runnable{
         paint.setTextSize(30);
         paint.setFakeBoldText(true);
         canvas.drawText("Life: "+life,canvas.getWidth()-110,40,paint);
-        bar.moveBar(leftPos,rightPos);
+
         this.ballXbrick(bricks,ball,canvas);
         this.ballXbar(bar,ball, canvas);
         ball.ballXboundary(canvas);
-        ball.move();
-        this.run();
+        new Thread(new Runnable() {
+            public void run() {
+                ball.move();
+                invalidate();
+            }
+        }).start();
+        new Thread(new Runnable() {
+            public void run() {
+                bar.moveBar(leftPos,rightPos);
+                invalidate();
+            }
+        }).start();
     }
     public void ballXbar(Bar myBar,Ball myBall,Canvas canvas){
         if(((ball.getY()+ball.getRadius())>=bar.getTop())&&((ball.getY()+ball.getRadius())<=bar.getBottom())&& ((ball.getX())>=bar.getLeft())&& ((ball.getX())<=bar.getRight())) {
@@ -158,10 +171,10 @@ public class GameCanvas extends View implements Runnable{
 
     }
 
-    @Override
+    /*@Override
     public void run() {
         invalidate();
-    }
+    }*/
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()){
